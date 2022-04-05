@@ -9,6 +9,7 @@ import geocoder
 import tkinter as tk
 from tkinter.font import Font
 from meteostat import *
+import os
 
 posi = geocoder.ip('me').latlng
 
@@ -59,13 +60,14 @@ def nn_model(a, b, p):
 # Graph Data
 def graph_data(data):
     plt.plot(data)
-    plt.show() # Unused
+    plt.show()  # Unused
 
 
 def create_prediction():
     prediction = 0.0
     while prediction == 0.0:
-        start, end, point = location_time(float(xcoord.get()), float(ycoord.get()))
+        start, end, point = location_time(
+            float(xcoord.get()), float(ycoord.get()))
         X, y, data = setup_data(start, end, point)
         z = meteostat.Daily(point, end - datetime.timedelta(days=1), end)
         # z = z.convert(units.imperial)
@@ -73,7 +75,8 @@ def create_prediction():
         z = z[["tavg", "prcp", "wspd", "pres"]]
         z = nn_model(X, y, z)
         prediction = z[0][0]
-    predlabel.configure(text=f"Prediction: {str((prediction * (9/5) + 32))[:5]}° F")
+    predlabel.configure(
+        text=f"Prediction: {str((prediction * (9/5) + 32))[:5]}° F")
 
 
 def reset_position():
@@ -88,28 +91,36 @@ def reset_position():
 if __name__ == '__main__':
     window = tk.Tk()
     window.geometry("400x250")
-    bgimage = tk.PhotoImage(file="bg.png")
+    real_path = os.path.realpath(__file__)
+    real_path = os.path.dirname(real_path)
+    bgimage = tk.PhotoImage(file=f"{real_path}\\bg.png")
     bg = tk.Label(image=bgimage)
     bg.place(x=-2, y=-1)
     window.title("WeatherPrediction")
 
-    font1 = tk.font.Font(family="Georgia", weight="bold", slant="italic", size=15)
-    font2 = tk.font.Font(family="Georgia", weight="normal", slant="italic", size=12)
-    font3 = tk.font.Font(family="Georgia", weight="bold", slant="italic", size=12)
+    font1 = tk.font.Font(family="Georgia", weight="bold",
+                         slant="italic", size=15)
+    font2 = tk.font.Font(family="Georgia", weight="normal",
+                         slant="italic", size=12)
+    font3 = tk.font.Font(family="Georgia", weight="bold",
+                         slant="italic", size=12)
 
-    title = tk.Label(text="Coordinates for prediction", font=font1, bg="#E2E50B", padx=0, pady=0)
+    title = tk.Label(text="Coordinates for prediction",
+                     font=font1, bg="#E2E50B", padx=0, pady=0)
 
-    xlabel = tk.Label(text="Lattitude", bg="#BBBD35", font=font2, padx=2, pady=2)
+    xlabel = tk.Label(text="Lattitude", bg="#BBBD35",
+                      font=font2, padx=2, pady=2)
     xcoord = tk.Entry(font=font2, bg="#BBBD35", justify="center")
     xcoord.insert(0, posi[0])
-    ylabel = tk.Label(text="Longitude", bg="#9E9F4C", font=font2, padx=2, pady=2)
+    ylabel = tk.Label(text="Longitude", bg="#9E9F4C",
+                      font=font2, padx=2, pady=2)
     ycoord = tk.Entry(font=font2, bg="#9E9F4C", justify="center")
     ycoord.insert(0, posi[1])
 
     ogcb = tk.Button(text="Reset Coordinates", command=reset_position, bg="#494949", font=font3, relief=tk.FLAT, padx=2,
                      pady=2)
 
-    predlabel = tk.Label("", bg="#73744E", font=font2)
+    predlabel = tk.Label(text="", bg="#73744E", font=font2)
     predbutton = tk.Button(text="Predict Weather", command=create_prediction, bg="#73744E", font=font3, relief=tk.FLAT,
                            padx=2, pady=2)
 
